@@ -64,7 +64,7 @@
                 <Grid>
                     <Rectangle Width="3" HorizontalAlignment="Left" Fill="{StaticResource B_Accent}"/>
                     <StackPanel Margin="16,10,10,10">
-                        <TextBlock Text="🖥  CPU Usage" FontSize="11" Foreground="{StaticResource B_Dim}"/>
+                        <TextBlock Text="CPU Usage" FontSize="11" Foreground="{StaticResource B_Dim}"/>
                         <TextBlock x:Name="TbCpuVal" Text="–" FontSize="22" FontWeight="Bold"
                                    Foreground="{StaticResource B_Accent}"/>
                     </StackPanel>
@@ -76,7 +76,7 @@
                 <Grid>
                     <Rectangle Width="3" HorizontalAlignment="Left" Fill="{StaticResource B_Accent2}"/>
                     <StackPanel Margin="16,10,10,10">
-                        <TextBlock Text="💾  RAM Usage" FontSize="11" Foreground="{StaticResource B_Dim}"/>
+                        <TextBlock Text="RAM Usage" FontSize="11" Foreground="{StaticResource B_Dim}"/>
                         <TextBlock x:Name="TbRamVal" Text="–" FontSize="22" FontWeight="Bold"
                                    Foreground="{StaticResource B_Accent2}"/>
                     </StackPanel>
@@ -88,7 +88,7 @@
                 <Grid>
                     <Rectangle Width="3" HorizontalAlignment="Left" Fill="{StaticResource B_Accent3}"/>
                     <StackPanel Margin="16,10,10,10">
-                        <TextBlock Text="⚙  Processes" FontSize="11" Foreground="{StaticResource B_Dim}"/>
+                        <TextBlock Text="Processes" FontSize="11" Foreground="{StaticResource B_Dim}"/>
                         <TextBlock x:Name="TbProcsVal" Text="–" FontSize="22" FontWeight="Bold"
                                    Foreground="{StaticResource B_Accent3}"/>
                     </StackPanel>
