@@ -63,6 +63,38 @@ namespace ProcessMonitor.Services
             return 8192;
         }
 
+        // ── WMI: process description + owner ──────────────────────────────
+        /// <summary>
+        /// Returns a dict of PID → (Description, Owner) via WMI Win32_Process.
+        /// Called once per refresh cycle to enrich ProcessInfo.
+        /// </summary>
+        public static Dictionary<int, (string desc, string user)> GetWmiProcessDetails()
+        {
+            var result = new Dictionary<int, (string, string)>();
+            try
+            {
+                using var searcher = new ManagementObjectSearcher(
+                    "SELECT ProcessId, Description, ExecutablePath FROM Win32_Process");
+                foreach (ManagementObject mo in searcher.Get())
+                {
+                    int pid   = Convert.ToInt32(mo["ProcessId"]);
+                    string desc = mo["Description"]?.ToString() ?? "";
+                    // GetOwner via method call
+                    string user = "";
+                    try
+                    {
+                        string[] ownerInfo = new string[2];
+                        mo.InvokeMethod("GetOwner", ownerInfo);
+                        user = string.IsNullOrEmpty(ownerInfo[0]) ? "" : $@"{ownerInfo[1]}\{ownerInfo[0]}";
+                    }
+                    catch { }
+                    result[pid] = (desc, user);
+                }
+            }
+            catch { }
+            return result;
+        }
+
         // ── Per-process CPU (delta-based) ─────────────────────────────────
         public float GetProcessCpu(Process p)
         {
@@ -72,7 +104,7 @@ namespace ProcessMonitor.Services
                 var cpu = p.TotalProcessorTime;
                 if (_prev.TryGetValue(p.Id, out var prev))
                 {
-                    double elapsed = (now - prev.ts).TotalSeconds;
+                    double elapsed  = (now - prev.ts).TotalSeconds;
                     double cpuDelta = (cpu - prev.cpu).TotalSeconds;
                     if (elapsed > 0)
                     {
@@ -90,6 +122,9 @@ namespace ProcessMonitor.Services
         // ── Enumerate all processes ───────────────────────────────────────
         public List<ProcessInfo> GetAllProcesses()
         {
+            // Fetch WMI details once (description + owner)
+            var wmi = GetWmiProcessDetails();
+
             var list = new List<ProcessInfo>();
             foreach (var p in Process.GetProcesses())
             {
@@ -106,8 +141,16 @@ namespace ProcessMonitor.Services
                     };
                     try { info.StartTime = p.StartTime.ToString("MM/dd HH:mm:ss"); } catch { }
                     try { info.Priority  = p.PriorityClass.ToString(); }             catch { info.Priority = "N/A"; }
-                    try { info.Status    = p.Responding ? "Running" : "Not Resp."; } catch { info.Status   = "N/A"; }
-                    try { info.FilePath  = p.MainModule?.FileName ?? ""; }           catch { }
+                    try { info.Status    = p.Responding ? "Running" : "Not Resp.";  } catch { info.Status  = "N/A"; }
+                    try { info.FilePath  = p.MainModule?.FileName ?? ""; }            catch { }
+
+                    // Enrich from WMI
+                    if (wmi.TryGetValue(p.Id, out var wmiInfo))
+                    {
+                        info.Description = wmiInfo.desc;
+                        info.User        = wmiInfo.user;
+                    }
+
                     list.Add(info);
                 }
                 catch { }
@@ -119,22 +162,6 @@ namespace ProcessMonitor.Services
         public (bool ok, string msg) KillProcess(int pid)
         {
             try { Process.GetProcessById(pid).Kill(); return (true, ""); }
-            catch (Exception ex) { return (false, ex.Message); }
-        }
-
-        public (bool ok, string msg) SuspendProcess(int pid)
-        {
-            // Suspend via NtSuspendProcess is not safe in managed code;
-            // use debug API approach — best-effort
-            try
-            {
-                var p = Process.GetProcessById(pid);
-                foreach (ProcessThread t in p.Threads)
-                {
-                    // no managed suspend for other processes — inform user
-                }
-                return (false, "Suspend is not supported without native API. Use Sysinternals Process Explorer.");
-            }
             catch (Exception ex) { return (false, ex.Message); }
         }
 

@@ -54,11 +54,13 @@ namespace ProcessMonitor.Views
 
         // ── Process list state ─────────────────────────────────────────────
         private List<ProcessInfo> _allProcs = new();
-        private string _filter   = "";
-        private int    _page     = 0;
-        private int    _pageSize = 100;
-        private string _sortProp = nameof(ProcessInfo.MemoryUsage);
-        private bool   _sortAsc  = false;
+        private string _filter    = "";
+        private float  _cpuMin    = 0f;
+        private float  _ramMin    = 0f;
+        private int    _page      = 0;
+        private int    _pageSize  = 100;
+        private string _sortProp  = nameof(ProcessInfo.MemoryUsage);
+        private bool   _sortAsc   = false;
 
         // ── Alert badge ────────────────────────────────────────────────────
         private int _unackedAlerts = 0;
@@ -87,15 +89,21 @@ namespace ProcessMonitor.Views
         {
             _isLoaded = true;
 
-            // Read initial values from ComboBoxes (SelectionChanged fired during
-            // InitializeComponent when _isLoaded was still false, so we do it here)
-            if (CmbInterval.SelectedItem is ComboBoxItem ci &&
-                int.TryParse(ci.Tag?.ToString(), out int ms) && ms > 0)
-                _refreshIntervalMs = ms;
+            // ── Restore settings from Windows Registry ─────────────────
+            _refreshIntervalMs = SettingsService.RefreshIntervalMs;
+            _pageSize          = SettingsService.PageSize;
+            _sortProp          = SettingsService.LastSortProp;
+            _sortAsc           = SettingsService.LastSortAsc;
+            _cpuMin            = SettingsService.CpuFilterMin;
+            _ramMin            = SettingsService.RamFilterMin;
 
-            if (CmbPageSize.SelectedItem is ComboBoxItem cp &&
-                int.TryParse(cp.Tag?.ToString(), out int ps) && ps > 0)
-                _pageSize = ps;
+            // Sync RadioButtons to loaded values
+            SyncIntervalRadios(_refreshIntervalMs);
+            SyncPageSizeRadios(_pageSize);
+
+            // Sync filter text boxes
+            if (TbCpuMin != null) TbCpuMin.Text = _cpuMin > 0 ? _cpuMin.ToString("0.##") : "0";
+            if (TbRamMin != null) TbRamMin.Text = _ramMin > 0 ? _ramMin.ToString("0.##") : "0";
 
             ApplyDarkTitleBar();
             _graphTimer.Start();
@@ -273,15 +281,30 @@ namespace ProcessMonitor.Views
         // ══════════════════════════════════════════════════════════════════
         //  TOP BAR CONTROLS
         // ══════════════════════════════════════════════════════════════════
-        private void CmbInterval_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        // ══════════════════════════════════════════════════════════════════
+        //  TOP BAR — REFRESH INTERVAL RADIO BUTTONS
+        // ══════════════════════════════════════════════════════════════════
+        private void RbInterval_Checked(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            if (CmbInterval.SelectedItem is ComboBoxItem item)
+            if (sender is RadioButton rb && int.TryParse(rb.Tag?.ToString(), out int ms) && ms > 0)
             {
-                string raw = item.Tag?.ToString() ?? "2000";
-                if (int.TryParse(raw, out int ms) && ms > 0)
-                    _refreshIntervalMs = ms;
+                _refreshIntervalMs = ms;
+                SettingsService.RefreshIntervalMs = ms;
             }
+        }
+
+        private void SyncIntervalRadios(int ms)
+        {
+            if (Rb1s  == null) return;
+            Rb1s.IsChecked  = (ms == 1000);
+            Rb2s.IsChecked  = (ms == 2000);
+            Rb5s.IsChecked  = (ms == 5000);
+            Rb10s.IsChecked = (ms == 10000);
+            // default if no match
+            if (!Rb1s.IsChecked!.Value && !Rb2s.IsChecked!.Value &&
+                !Rb5s.IsChecked!.Value && !Rb10s.IsChecked!.Value)
+                Rb2s.IsChecked = true;
         }
 
         // ══════════════════════════════════════════════════════════════════
@@ -310,20 +333,40 @@ namespace ProcessMonitor.Views
             ApplyFilter();
         }
 
-        private void CmbPageSize_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        // ══════════════════════════════════════════════════════════════════
+        //  TAB 1 TOOLBAR — PAGE SIZE RADIO BUTTONS & FILTERS
+        // ══════════════════════════════════════════════════════════════════
+        private void RbPageSize_Checked(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            if (CmbPageSize.SelectedItem is ComboBoxItem item)
+            if (sender is RadioButton rb && int.TryParse(rb.Tag?.ToString(), out int ps) && ps > 0)
             {
-                // Try Tag first, fall back to Content
-                string raw = item.Tag?.ToString() ?? item.Content?.ToString() ?? "100";
-                if (int.TryParse(raw, out int ps) && ps > 0)
-                {
-                    _pageSize = ps;
-                    _page     = 0;
-                    ApplyFilter();
-                }
+                _pageSize = ps;
+                _page     = 0;
+                SettingsService.PageSize = ps;
+                ApplyFilter();
             }
+        }
+
+        private void SyncPageSizeRadios(int ps)
+        {
+            if (Rp50 == null) return;
+            Rp50.IsChecked  = (ps == 50);
+            Rp100.IsChecked = (ps == 100);
+            Rp200.IsChecked = (ps == 200);
+            if (!Rp50.IsChecked!.Value && !Rp100.IsChecked!.Value && !Rp200.IsChecked!.Value)
+                Rp100.IsChecked = true;
+        }
+
+        private void FilterNumeric_Changed(object sender, TextChangedEventArgs e)
+        {
+            if (!_isLoaded) return;
+            float.TryParse(TbCpuMin?.Text ?? "0", out _cpuMin);
+            float.TryParse(TbRamMin?.Text ?? "0", out _ramMin);
+            SettingsService.CpuFilterMin = _cpuMin;
+            SettingsService.RamFilterMin = _ramMin;
+            _page = 0;
+            ApplyFilter();
         }
 
         private void ProcListHeader_Click(object sender, RoutedEventArgs e)
@@ -346,6 +389,8 @@ namespace ProcessMonitor.Views
                 if (prop == null) return;
                 if (_sortProp == prop) _sortAsc = !_sortAsc;
                 else { _sortProp = prop; _sortAsc = false; }
+                SettingsService.LastSortProp = _sortProp;
+                SettingsService.LastSortAsc  = _sortAsc;
                 _page = 0;
                 ApplyFilter();
             }
@@ -358,10 +403,20 @@ namespace ProcessMonitor.Views
             if (ProcList == null || TbPage == null) return;
 
             IEnumerable<ProcessInfo> view = _allProcs;
+
+            // Name / PID search
             if (!string.IsNullOrEmpty(_filter))
                 view = view.Where(p =>
                     p.Name.Contains(_filter, StringComparison.OrdinalIgnoreCase) ||
                     p.Pid.ToString().Contains(_filter));
+
+            // CPU filter
+            if (_cpuMin > 0f)
+                view = view.Where(p => p.CpuUsage >= _cpuMin);
+
+            // RAM filter
+            if (_ramMin > 0f)
+                view = view.Where(p => p.MemoryUsage >= _ramMin);
 
             view = _sortProp switch
             {
