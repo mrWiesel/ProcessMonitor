@@ -503,10 +503,27 @@ namespace ProcessMonitor.Views
 
         private void BtnStart_Click(object sender, RoutedEventArgs e)
         {
-            string path = InputDialog.Show("Executable path or name:", "Start Process", "");
-            if (string.IsNullOrWhiteSpace(path)) return;
-            try { Process.Start(new ProcessStartInfo(path) { UseShellExecute = true }); }
-            catch (Exception ex) { MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error); }
+            var dlg = new OpenFileDialog
+            {
+                Title           = "Select application to start",
+                Filter          = "Executables (*.exe)|*.exe|All files (*.*)|*.*",
+                FilterIndex     = 1,
+                CheckFileExists = true,
+                CheckPathExists = true
+            };
+
+            if (dlg.ShowDialog() != true) return;
+
+            try
+            {
+                Process.Start(new ProcessStartInfo(dlg.FileName) { UseShellExecute = true });
+                TbStatus.Text = $"  Started: {System.IO.Path.GetFileName(dlg.FileName)}";
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Cannot start process",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         private void MenuAddToMonitor_Click(object sender, RoutedEventArgs e)
