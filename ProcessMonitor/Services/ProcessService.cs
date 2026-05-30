@@ -64,10 +64,6 @@ namespace ProcessMonitor.Services
         }
 
         // ── WMI: process description + owner ──────────────────────────────
-        /// <summary>
-        /// Returns a dict of PID → (Description, Owner) via WMI Win32_Process.
-        /// Called once per refresh cycle to enrich ProcessInfo.
-        /// </summary>
         public static Dictionary<int, (string desc, string user)> GetWmiProcessDetails()
         {
             var result = new Dictionary<int, (string, string)>();

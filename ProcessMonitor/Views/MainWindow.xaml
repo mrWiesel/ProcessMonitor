@@ -6,9 +6,9 @@
         xmlns:conv="clr-namespace:ProcessMonitor.Converters"
         xmlns:models="clr-namespace:ProcessMonitor.Models"
         mc:Ignorable="d"
-        d:DesignWidth="1220" d:DesignHeight="780"
+        d:DesignWidth="1220"
         Title="⬡  ProcessMonitor  —  Windows System Analyser"
-        Width="1220" Height="780" MinWidth="900" MinHeight="600"
+        Width="1220" Height="879" MinWidth="900" MinHeight="600"
         WindowStartupLocation="CenterScreen"
         Background="{StaticResource B_BG}"
         Foreground="{StaticResource B_Text}">
@@ -81,25 +81,6 @@
                            FontSize="18" FontWeight="Bold"
                            Foreground="{StaticResource B_Accent}"
                            VerticalAlignment="Center"/>
-                <StackPanel Orientation="Horizontal"
-                            HorizontalAlignment="Right"
-                            VerticalAlignment="Center">
-                    <TextBlock Text="Refresh:" Foreground="{StaticResource B_Dim}"
-                               VerticalAlignment="Center" FontSize="12" Margin="0,0,10,0"/>
-                    <!-- RadioButton group for refresh interval -->
-                    <RadioButton x:Name="Rb1s"  Content="1s"   GroupName="Interval" Tag="1000"
-                                 Margin="0,0,8,0" VerticalAlignment="Center"
-                                 Checked="RbInterval_Checked" Style="{StaticResource DarkRadio}"/>
-                    <RadioButton x:Name="Rb2s"  Content="2s"   GroupName="Interval" Tag="2000"
-                                 Margin="0,0,8,0" VerticalAlignment="Center" IsChecked="True"
-                                 Checked="RbInterval_Checked" Style="{StaticResource DarkRadio}"/>
-                    <RadioButton x:Name="Rb5s"  Content="5s"   GroupName="Interval" Tag="5000"
-                                 Margin="0,0,8,0" VerticalAlignment="Center"
-                                 Checked="RbInterval_Checked" Style="{StaticResource DarkRadio}"/>
-                    <RadioButton x:Name="Rb10s" Content="10s"  GroupName="Interval" Tag="10000"
-                                 Margin="0,0,0,0" VerticalAlignment="Center"
-                                 Checked="RbInterval_Checked" Style="{StaticResource DarkRadio}"/>
-                </StackPanel>
             </Grid>
         </Border>
 
@@ -111,7 +92,7 @@
                 <Grid>
                     <Rectangle Width="3" HorizontalAlignment="Left" Fill="{StaticResource B_Accent}"/>
                     <StackPanel Margin="16,10,10,10">
-                        <TextBlock Text="🖥  CPU Usage" FontSize="11" Foreground="{StaticResource B_Dim}"/>
+                        <TextBlock Text="CPU Usage" FontSize="11" Foreground="{StaticResource B_Dim}"/>
                         <TextBlock x:Name="TbCpuVal" Text="–" FontSize="22" FontWeight="Bold"
                                    Foreground="{StaticResource B_Accent}"/>
                     </StackPanel>
@@ -123,7 +104,7 @@
                 <Grid>
                     <Rectangle Width="3" HorizontalAlignment="Left" Fill="{StaticResource B_Accent2}"/>
                     <StackPanel Margin="16,10,10,10">
-                        <TextBlock Text="💾  RAM Usage" FontSize="11" Foreground="{StaticResource B_Dim}"/>
+                        <TextBlock Text="RAM Usage" FontSize="11" Foreground="{StaticResource B_Dim}"/>
                         <TextBlock x:Name="TbRamVal" Text="–" FontSize="22" FontWeight="Bold"
                                    Foreground="{StaticResource B_Accent2}"/>
                     </StackPanel>
@@ -135,7 +116,7 @@
                 <Grid>
                     <Rectangle Width="3" HorizontalAlignment="Left" Fill="{StaticResource B_Accent3}"/>
                     <StackPanel Margin="16,10,10,10">
-                        <TextBlock Text="⚙  Processes" FontSize="11" Foreground="{StaticResource B_Dim}"/>
+                        <TextBlock Text="Processes" FontSize="11" Foreground="{StaticResource B_Dim}"/>
                         <TextBlock x:Name="TbProcsVal" Text="–" FontSize="22" FontWeight="Bold"
                                    Foreground="{StaticResource B_Accent3}"/>
                     </StackPanel>
@@ -191,17 +172,17 @@
             </TabControl.Resources>
 
             <!-- ── Tab 1: Processes ─────────────────────────────────── -->
-            <TabItem Header="⚙  Processes" x:Name="TabProcesses">
+            <TabItem Header="Processes" x:Name="TabProcesses">
                 <Grid Background="{StaticResource B_BG}">
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="42"/>
-                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="86"/>
+                        <RowDefinition/>
                         <RowDefinition Height="30"/>
                     </Grid.RowDefinitions>
 
                     <Border Grid.Row="0" Background="{StaticResource B_BG}"
                             BorderBrush="{StaticResource B_Border}" BorderThickness="0,0,0,1">
-                        <WrapPanel Margin="8,7" Orientation="Horizontal" VerticalAlignment="Center">
+                        <WrapPanel Margin="8,7" Orientation="Horizontal">
                             <Grid Width="260" Height="26" Margin="0,0,8,0">
                                 <TextBox x:Name="SearchBox"
                                          Style="{StaticResource DarkTextBox}"
@@ -234,7 +215,7 @@
                                     Foreground="{StaticResource B_Accent}"
                                     BorderBrush="{StaticResource B_Accent}"
                                     Click="BtnStart_Click"/>
-                        <TextBlock Text="Per page:" VerticalAlignment="Center"
+                            <TextBlock Text="Per page:" VerticalAlignment="Center"
                                        Foreground="{StaticResource B_Dim}"
                                        Margin="0,0,8,0" FontSize="12"/>
                             <RadioButton x:Name="Rp50"  Content="50"  GroupName="PageSize" Tag="50"
@@ -276,7 +257,7 @@
                               Style="{StaticResource DarkListView}"
                               ItemContainerStyle="{StaticResource DarkListViewItem}"
                               MouseDoubleClick="ProcList_DoubleClick"
-                              GridViewColumnHeader.Click="ProcListHeader_Click">
+                              GridViewColumnHeader.Click="ProcListHeader_Click" Margin="0,10,0,0" Grid.RowSpan="2" Height="462" VerticalAlignment="Top">
                         <ListView.ContextMenu>
                             <ContextMenu Background="{StaticResource B_Panel2}"
                                          Foreground="{StaticResource B_Text}"
@@ -407,15 +388,17 @@
             </TabItem>
 
             <!-- ── Tab 2: Monitoring ────────────────────────────────── -->
-            <TabItem Header="👁  Monitoring" x:Name="TabMonitoring">
+            <TabItem Header="Monitoring" x:Name="TabMonitoring">
                 <Grid Background="{StaticResource B_BG}">
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="44"/>
-                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="86"/>
+                        <RowDefinition Height="0.417"/>
+                        <RowDefinition Height="7"/>
+                        <RowDefinition/>
                     </Grid.RowDefinitions>
 
                     <Border Grid.Row="0" Background="{StaticResource B_Panel}"
-                            BorderBrush="{StaticResource B_Border}" BorderThickness="0,0,0,1">
+                            BorderBrush="{StaticResource B_Border}" BorderThickness="0,0,0,1" Grid.RowSpan="3">
                         <WrapPanel Margin="8,8" Orientation="Horizontal">
                             <Button Content="➕  Add"    Margin="0,0,8,0"
                                     Style="{StaticResource AccentBtn}"
@@ -439,10 +422,10 @@
                         </WrapPanel>
                     </Border>
 
-                    <ListView x:Name="MonList" Grid.Row="1"
+                    <ListView x:Name="MonList" Grid.Row="2"
                               Style="{StaticResource DarkListView}"
                               ItemContainerStyle="{StaticResource DarkListViewItem}"
-                              GridViewColumnHeader.Click="MonListHeader_Click">
+                              GridViewColumnHeader.Click="MonListHeader_Click" Margin="0,4,0,0" Grid.RowSpan="2">
                         <ListView.View>
                             <GridView ColumnHeaderContainerStyle="{StaticResource DarkGridViewColumnHeader}">
                                 <GridViewColumn Header="ID"           Width="50">
@@ -508,7 +491,7 @@
             <TabItem x:Name="TabAlerts">
                 <TabItem.Header>
                     <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="🔔  Alerts"/>
+                        <TextBlock Text="Alerts"/>
                         <Border x:Name="AlertBadge" Margin="6,0,0,0"
                                 Background="{StaticResource B_Accent3}"
                                 CornerRadius="8" Padding="5,1"
@@ -521,12 +504,12 @@
                 </TabItem.Header>
                 <Grid Background="{StaticResource B_BG}">
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="44"/>
-                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="86"/>
+                        <RowDefinition/>
                     </Grid.RowDefinitions>
 
                     <Border Grid.Row="0" Background="{StaticResource B_Panel}"
-                            BorderBrush="{StaticResource B_Border}" BorderThickness="0,0,0,1">
+                            BorderBrush="{StaticResource B_Border}" BorderThickness="0,0,0,1" HorizontalAlignment="Right" Width="1214">
                         <WrapPanel Margin="8,8" Orientation="Horizontal">
                             <TextBlock x:Name="TbAlertCount" Text="0 alerts"
                                        VerticalAlignment="Center" Margin="0,0,16,0"
@@ -627,31 +610,31 @@
             </TabItem>
 
             <!-- ── Tab 4: Snapshots ─────────────────────────────────── -->
-            <TabItem Header="📷  Snapshots" x:Name="TabSnapshots">
+            <TabItem Header="Snapshots" x:Name="TabSnapshots">
                 <Grid Background="{StaticResource B_BG}">
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="44"/>
-                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="86"/>
+                        <RowDefinition/>
                     </Grid.RowDefinitions>
 
                     <Border Grid.Row="0" Background="{StaticResource B_Panel}"
                             BorderBrush="{StaticResource B_Border}" BorderThickness="0,0,0,1">
                         <WrapPanel Margin="8,8" Orientation="Horizontal">
-                            <Button Content="📷 Take"   Margin="0,0,8,0"
+                            <Button Content="Take"   Margin="0,0,8,0"
                                     Style="{StaticResource AccentBtn}"
                                     Foreground="{StaticResource B_Accent}"
                                     BorderBrush="{StaticResource B_Accent}"
                                     Click="BtnTakeSnap_Click"/>
-                            <Button Content="⬇ Export"  Margin="0,0,8,0"
+                            <Button Content="Export"  Margin="0,0,8,0"
                                     Style="{StaticResource AccentBtn}"
                                     Foreground="{StaticResource B_Accent2}"
                                     BorderBrush="{StaticResource B_Accent2}"
                                     Click="BtnExportSnap_Click"/>
-                            <Button Content="⇄ Compare" Margin="0,0,8,0"
+                            <Button Content="Compare" Margin="0,0,8,0"
                                     Style="{StaticResource AccentBtn}"
                                     Foreground="#D2A0FF" BorderBrush="#D2A0FF"
                                     Click="BtnCompareSnap_Click"/>
-                            <Button Content="✕ Delete"
+                            <Button Content="Delete"
                                     Style="{StaticResource AccentBtn}"
                                     Foreground="{StaticResource B_Accent3}"
                                     BorderBrush="{StaticResource B_Accent3}"
@@ -661,7 +644,8 @@
 
                     <Grid Grid.Row="1">
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="420"/>
+                            <ColumnDefinition Width="322"/>
+                            <ColumnDefinition Width="98"/>
                             <ColumnDefinition Width="4"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
@@ -669,7 +653,7 @@
                         <ListView x:Name="SnapList" Grid.Column="0"
                                   Style="{StaticResource DarkListView}"
                                   ItemContainerStyle="{StaticResource DarkListViewItem}"
-                                  SelectionChanged="SnapList_SelectionChanged">
+                                  SelectionChanged="SnapList_SelectionChanged" Grid.ColumnSpan="2">
                             <ListView.View>
                                 <GridView ColumnHeaderContainerStyle="{StaticResource DarkGridViewColumnHeader}">
                                     <GridViewColumn Header="ID"     Width="42">
@@ -719,11 +703,11 @@
                             </ListView.View>
                         </ListView>
 
-                        <GridSplitter Grid.Column="1" Width="4"
+                        <GridSplitter Grid.Column="2" Width="4"
                                       HorizontalAlignment="Stretch"
                                       Background="{StaticResource B_Border}"/>
 
-                        <TextBox x:Name="SnapDetail" Grid.Column="2"
+                        <TextBox x:Name="SnapDetail" Grid.Column="3"
                                  IsReadOnly="True" TextWrapping="NoWrap"
                                  FontFamily="Consolas" FontSize="12"
                                  Background="{StaticResource B_Panel}"

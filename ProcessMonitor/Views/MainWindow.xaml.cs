@@ -1,21 +1,14 @@
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Runtime.InteropServices;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
-using System.Windows.Media.Animation;
 using System.Windows.Shapes;
 using System.Windows.Threading;
 using Microsoft.Win32;
 using ProcessMonitor.Models;
 using ProcessMonitor.Services;
-using ProcessMonitor.Views;
 
 namespace ProcessMonitor.Views
 {
@@ -98,7 +91,6 @@ namespace ProcessMonitor.Views
             _ramMin            = SettingsService.RamFilterMin;
 
             // Sync RadioButtons to loaded values
-            SyncIntervalRadios(_refreshIntervalMs);
             SyncPageSizeRadios(_pageSize);
 
             // Sync filter text boxes
@@ -294,18 +286,7 @@ namespace ProcessMonitor.Views
             }
         }
 
-        private void SyncIntervalRadios(int ms)
-        {
-            if (Rb1s  == null) return;
-            Rb1s.IsChecked  = (ms == 1000);
-            Rb2s.IsChecked  = (ms == 2000);
-            Rb5s.IsChecked  = (ms == 5000);
-            Rb10s.IsChecked = (ms == 10000);
-            // default if no match
-            if (!Rb1s.IsChecked!.Value && !Rb2s.IsChecked!.Value &&
-                !Rb5s.IsChecked!.Value && !Rb10s.IsChecked!.Value)
-                Rb2s.IsChecked = true;
-        }
+
 
         // ══════════════════════════════════════════════════════════════════
         //  TAB SELECTION
